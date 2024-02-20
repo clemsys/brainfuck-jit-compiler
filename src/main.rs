@@ -1,4 +1,4 @@
-use brainfuck_jit_compiler::lib::{interpreter::BfMachine, program::Program};
+use brainfuck_jit_compiler::lib::interpreter::Interpreter;
 use clap::{arg, command, value_parser};
 use std::{fs, process};
 
@@ -14,22 +14,20 @@ fn main() {
     let filename = matches.get_one::<String>("FILE").unwrap();
 
     let program = match fs::read_to_string(filename) {
-        Ok(program) => program,
+        Ok(program) => program.into(),
         Err(e) => {
-            eprintln!("Error reading file: {}", e);
+            eprintln!("Error reading file: {e}");
             process::exit(1);
         }
     };
 
-    let program: Program = match Program::try_from(program) {
-        Ok(program) => program,
-        Err(e) => {
-            eprintln!("Error parsing file: {}", e);
+    match Interpreter::new(program, 30_000) {
+        Ok(mut machine) => {
+            machine.run();
+        }
+        Err(i) => {
+            eprintln!("Unmatched bracket: {i}-th command in file");
             process::exit(2);
         }
-    };
-
-    let mut machine = BfMachine::new(program, 30_000);
-
-    machine.run();
+    }
 }

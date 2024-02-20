@@ -1,5 +1,5 @@
 #[derive(PartialEq)]
-pub enum BfCommand {
+pub enum Command {
     MoveRight,
     MoveLeft,
     Increment,
@@ -10,7 +10,7 @@ pub enum BfCommand {
     LoopEnd,
 }
 
-impl TryFrom<char> for BfCommand {
+impl TryFrom<char> for Command {
     type Error = char;
 
     fn try_from(c: char) -> Result<Self, Self::Error> {

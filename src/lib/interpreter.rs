@@ -1,58 +1,55 @@
-use super::{command::BfCommand, program::Program};
+use std::collections::HashMap;
 
-pub struct BfMachine {
+use super::{command::Command, program::Program};
+
+pub struct Interpreter {
     program: Program,
     data: Vec<u8>,
+    matching_brackets: HashMap<usize, usize>,
     program_ptr: usize,
     data_ptr: usize,
 }
 
-impl BfMachine {
-    pub fn new(program: Program, data_size: usize) -> Self {
-        Self {
+impl Interpreter {
+    pub fn new(program: Program, data_size: usize) -> Result<Self, usize> {
+        let matching_brackets = program.find_matching_brackets()?;
+        Ok(Self {
             program,
-            program_ptr: 0,
             data: vec![0u8; data_size],
+            matching_brackets,
+            program_ptr: 0,
             data_ptr: 0,
-        }
+        })
     }
 
     fn step(&mut self) {
         match self.program[self.program_ptr] {
-            BfCommand::MoveRight => self.data_ptr = self.data_ptr + 1,
-            BfCommand::MoveLeft => self.data_ptr = self.data_ptr - 1,
-            BfCommand::Increment => {
+            Command::MoveRight => self.data_ptr = self.data_ptr + 1,
+            Command::MoveLeft => self.data_ptr = self.data_ptr - 1,
+            Command::Increment => {
                 self.data[self.data_ptr] = self.data[self.data_ptr].wrapping_add(1)
             }
-            BfCommand::Decrement => {
+            Command::Decrement => {
                 self.data[self.data_ptr] = self.data[self.data_ptr].wrapping_sub(1)
             }
-            BfCommand::Print => print!("{}", self.data[self.data_ptr] as char),
-            BfCommand::Read => todo!(),
-            BfCommand::LoopStart => {
+            Command::Print => print!("{}", self.data[self.data_ptr] as char),
+            Command::Read => todo!(),
+            Command::LoopStart => {
                 if self.data[self.data_ptr] == 0 {
-                    let mut bracket_nesting = 1;
-                    while bracket_nesting > 0 && self.program_ptr < self.program.len() {
-                        self.program_ptr += 1;
-                        match self.program[self.program_ptr] {
-                            BfCommand::LoopStart => bracket_nesting += 1,
-                            BfCommand::LoopEnd => bracket_nesting -= 1,
-                            _ => (),
-                        }
-                    }
+                    self.program_ptr = self
+                        .matching_brackets
+                        .get(&self.program_ptr)
+                        .unwrap()
+                        .clone();
                 }
             }
-            BfCommand::LoopEnd => {
+            Command::LoopEnd => {
                 if self.data[self.data_ptr] != 0 {
-                    let mut bracket_nesting = 1;
-                    while bracket_nesting > 0 && self.program_ptr < self.program.len() {
-                        self.program_ptr -= 1;
-                        match self.program[self.program_ptr] {
-                            BfCommand::LoopStart => bracket_nesting -= 1,
-                            BfCommand::LoopEnd => bracket_nesting += 1,
-                            _ => (),
-                        }
-                    }
+                    self.program_ptr = self
+                        .matching_brackets
+                        .get(&self.program_ptr)
+                        .unwrap()
+                        .clone();
                 }
             }
         };
