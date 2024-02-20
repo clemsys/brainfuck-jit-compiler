@@ -1,4 +1,7 @@
-use std::collections::HashMap;
+use std::{
+    collections::HashMap,
+    io::{self, Read},
+};
 
 use super::{command::Command, program::Program};
 
@@ -33,7 +36,9 @@ impl Interpreter {
                 self.data[self.data_ptr] = self.data[self.data_ptr].wrapping_sub(1)
             }
             Command::Print => print!("{}", self.data[self.data_ptr] as char),
-            Command::Read => todo!(),
+            Command::Read => io::stdin()
+                .read_exact(&mut self.data[self.data_ptr..=(self.data_ptr)])
+                .unwrap(),
             Command::LoopStart => {
                 if self.data[self.data_ptr] == 0 {
                     self.program_ptr = self
