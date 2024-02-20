@@ -1,73 +1,10 @@
-use std::ops::Deref;
-
-#[derive(PartialEq)]
-pub enum BfCommand {
-    MoveRight,
-    MoveLeft,
-    Increment,
-    Decrement,
-    Print,
-    Read,
-    LoopStart,
-    LoopEnd,
-}
-
-impl TryFrom<char> for BfCommand {
-    type Error = char;
-
-    fn try_from(value: char) -> Result<Self, Self::Error> {
-        match value {
-            '>' => Ok(Self::MoveRight),
-            '<' => Ok(Self::MoveLeft),
-            '+' => Ok(Self::Increment),
-            '-' => Ok(Self::Decrement),
-            '.' => Ok(Self::Print),
-            ',' => Ok(Self::Read),
-            '[' => Ok(Self::LoopStart),
-            ']' => Ok(Self::LoopEnd),
-            _ => Err(value),
-        }
-    }
-}
-
-pub struct Program(Vec<BfCommand>);
-
-impl Deref for Program {
-    type Target = Vec<BfCommand>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl From<&str> for Program {
-    fn from(input: &str) -> Self {
-        Self(
-            input
-                .chars()
-                .filter_map(|c| BfCommand::try_from(c).ok())
-                .collect(),
-        )
-    }
-}
-
-impl From<&String> for Program {
-    fn from(input: &String) -> Self {
-        Self::from(&input[..])
-    }
-}
-
-impl From<String> for Program {
-    fn from(input: String) -> Self {
-        Self::from(&input[..])
-    }
-}
+use super::{command::BfCommand, program::Program};
 
 pub struct BfMachine {
     program: Program,
     data: Vec<u8>,
-    data_ptr: usize,
     program_ptr: usize,
+    data_ptr: usize,
 }
 
 impl BfMachine {

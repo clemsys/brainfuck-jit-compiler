@@ -1,4 +1,4 @@
-use brainfuck_jit_compiler::lib::interpreter::{BfMachine, Program};
+use brainfuck_jit_compiler::lib::{interpreter::BfMachine, program::Program};
 use clap::{arg, command, value_parser};
 use std::{fs, process};
 
