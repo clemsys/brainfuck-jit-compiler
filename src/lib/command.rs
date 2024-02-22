@@ -1,4 +1,4 @@
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq)]
 pub enum Command {
     MoveRight,
     MoveLeft,
@@ -6,8 +6,8 @@ pub enum Command {
     Decrement,
     Print,
     Read,
-    LoopStart,
-    LoopEnd,
+    JumpForward,
+    JumpBackwards,
 }
 
 impl TryFrom<char> for Command {
@@ -21,8 +21,8 @@ impl TryFrom<char> for Command {
             '-' => Ok(Self::Decrement),
             '.' => Ok(Self::Print),
             ',' => Ok(Self::Read),
-            '[' => Ok(Self::LoopStart),
-            ']' => Ok(Self::LoopEnd),
+            '[' => Ok(Self::JumpForward),
+            ']' => Ok(Self::JumpBackwards),
             _ => Err(c),
         }
     }

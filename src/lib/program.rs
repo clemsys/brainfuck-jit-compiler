@@ -12,13 +12,18 @@ impl Deref for Program {
 }
 
 impl Program {
+    /// Returns a `HashMap` which maps the index of a left or right bracket to the index of its matching bracket.
+    ///
+    /// # Errors
+    ///
+    /// If a bracket is unmatched, returns an error containing its index.
     pub(super) fn find_matching_brackets(&self) -> Result<HashMap<usize, usize>, usize> {
         let mut matching_brackets = HashMap::new();
-        let mut brackets_stack = Vec::new();
+        let mut left_brackets_stack = Vec::new();
         for (i, cmd) in self.iter().enumerate() {
             match cmd {
-                Command::LoopStart => brackets_stack.push(i),
-                Command::LoopEnd => match brackets_stack.pop() {
+                Command::JumpForward => left_brackets_stack.push(i),
+                Command::JumpBackwards => match left_brackets_stack.pop() {
                     Some(j) => {
                         matching_brackets.insert(i, j);
                         matching_brackets.insert(j, i);
@@ -28,10 +33,7 @@ impl Program {
                 _ => (),
             };
         }
-        match brackets_stack.pop() {
-            Some(j) => Err(j),
-            None => Ok(matching_brackets),
-        }
+        left_brackets_stack.pop().map_or(Ok(matching_brackets), Err)
     }
 }
 

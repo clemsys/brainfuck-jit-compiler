@@ -4,8 +4,8 @@ build:
 	cargo build --release
 
 copy:
-	cp target/release/brainfuck-jit-compiler .
+	cp target/release/brainfuck .
 
 clean:
 	cargo clean
-	rm brainfuck-jit-compiler
+	rm brainfuck
