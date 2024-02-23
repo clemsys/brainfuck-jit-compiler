@@ -14,7 +14,9 @@ This calls `cargo build --release` and copies the binary from `target/release/` 
 
 `./brainfuck -n <FILE>` to run the brainfuck program written in `<FILE>` using the unoptimized JIT compiler
 
-`./brainfuck -i <FILE>` to run the brainfuck program written in `<FILE>` using the interpreter
+`./brainfuck -i <FILE>` to run the brainfuck program written in `<FILE>` using the optimized interpreter
+
+`./brainfuck -i -n <FILE>` to run the brainfuck program written in `<FILE>` using the unoptimized interpreter
 
 Brainfuck samples can be found in the samples directory. Notably, `./brainfuck samples/mandelbrot.bf` prints the mandelbrot set in the terminal.
 
@@ -24,7 +26,7 @@ Brainfuck samples can be found in the samples directory. Notably, `./brainfuck s
 
 `/src/bin/brainfuck.rs` uses [clap](https://crates.io/crates/clap) to produce a command-line utility
 
-### Interpreter and (unoptimized) compiler
+### Unoptimized interpreter and compiler
 
 `/src/lib/{command.rs, program.rs}` provides us with structs to represent brainfuck commands and programs
 
@@ -32,13 +34,15 @@ Brainfuck samples can be found in the samples directory. Notably, `./brainfuck s
 
 `/src/lib/compiler.rs` makes it possible to compile a brainfuck program JIT and to execute the generated machine code
 
-### Optimized compiler
+### Optimized interpreter and compiler
 
 `/src/lib/{optimized_command.rs, optimized_program.rs}` provides us with structs to represent optimized brainfuck commands (see section below) which are combined in optimized brainfuck programs
 
+`/src/lib/optimized_interpreter.rs` does the same as `interpreter.rs` but on an optimized brainfuck program
+
 `/src/lib/optimized_compiler.rs` does the same as `compiler.rs` but on an optimized brainfuck program
 
-## JIT compiler optimizations
+## JIT compiler and interpreter optimizations
 
 - pack series of `+`/`-` into one `Add`
 - pack series of `>`/`<` into one `Move`
@@ -48,8 +52,9 @@ Brainfuck samples can be found in the samples directory. Notably, `./brainfuck s
 
 time needed for each method to run `mandelbrot.bf` on a scale normalized at one for the optimized compiler
 
-| method             | time  |
-| ------------------ | ----- |
-| optimized compiler | 1     |
-| compiler           | 3.12  |
-| interpreter        | 23.95 |
+| method                | time |
+| --------------------- | ---- |
+| optimized compiler    | 1    |
+| compiler              | 3.12 |
+| optimized_interpreter | 18.8 |
+| interpreter           | 27.7 |

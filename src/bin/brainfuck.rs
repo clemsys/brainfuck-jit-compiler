@@ -1,5 +1,6 @@
 use brainfuck_jit_compiler::lib::{
     compiler::Compiler, interpreter::Interpreter, optimized_compiler::OptimizedCompiler,
+    optimized_interpreter::OptimizedInterpreter,
 };
 use clap::Parser;
 use std::{fs, process};
@@ -28,10 +29,12 @@ fn main() {
         }
     };
 
-    if args.interpret {
-        match Interpreter::new(program, 30_000) {
-            Ok(mut machine) => {
-                machine.run();
+    if args.interpret && args.no_optimize {
+        Interpreter::new(program, 30_000).run();
+    } else if args.interpret {
+        match OptimizedInterpreter::new(program.into(), 30_000) {
+            Ok(mut interpreter) => {
+                interpreter.run();
             }
             Err(i) => {
                 eprintln!("Unmatched bracket: {i}-th command in file");
@@ -39,10 +42,8 @@ fn main() {
             }
         }
     } else if args.no_optimize {
-        let mut compiler = Compiler::new(program, 30_000);
-        compiler.run();
+        Compiler::new(program, 30_000).run();
     } else {
-        let mut compiler = OptimizedCompiler::new(program.into(), 30_000);
-        compiler.run();
+        OptimizedCompiler::new(program.into(), 30_000).run();
     }
 }

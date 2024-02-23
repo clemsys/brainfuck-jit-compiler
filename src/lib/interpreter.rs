@@ -1,33 +1,22 @@
-use std::{
-    collections::HashMap,
-    io::{self, Read},
-};
+use std::io::{self, Read};
 
 use super::{command::Command, program::Program};
 
 pub struct Interpreter {
     program: Program,
     data: Vec<u8>,
-    matching_brackets: HashMap<usize, usize>,
     program_ptr: usize,
     data_ptr: usize,
 }
 
 impl Interpreter {
-    /// Tries to create a new `Interpreter` from a `Program`, matching its brackets.
-    ///
-    /// # Errors
-    ///
-    /// If a bracket in program is unmatched, returns an error containing its index.
-    pub fn new(program: Program, data_size: usize) -> Result<Self, usize> {
-        let matching_brackets = program.find_matching_brackets()?;
-        Ok(Self {
+    pub fn new(program: Program, data_size: usize) -> Self {
+        Self {
             program,
             data: vec![0u8; data_size],
-            matching_brackets,
             program_ptr: 0,
             data_ptr: 0,
-        })
+        }
     }
 
     fn step(&mut self) {
@@ -46,12 +35,28 @@ impl Interpreter {
                 .unwrap(),
             Command::JumpForward => {
                 if self.data[self.data_ptr] == 0 {
-                    self.program_ptr = *self.matching_brackets.get(&self.program_ptr).unwrap();
+                    let mut bracket_nesting = 1;
+                    while bracket_nesting > 0 && self.program_ptr < self.program.len() {
+                        self.program_ptr += 1;
+                        match self.program[self.program_ptr] {
+                            Command::JumpForward => bracket_nesting += 1,
+                            Command::JumpBackwards => bracket_nesting -= 1,
+                            _ => (),
+                        }
+                    }
                 }
             }
             Command::JumpBackwards => {
                 if self.data[self.data_ptr] != 0 {
-                    self.program_ptr = *self.matching_brackets.get(&self.program_ptr).unwrap();
+                    let mut bracket_nesting = 1;
+                    while bracket_nesting > 0 && self.program_ptr < self.program.len() {
+                        self.program_ptr -= 1;
+                        match self.program[self.program_ptr] {
+                            Command::JumpForward => bracket_nesting -= 1,
+                            Command::JumpBackwards => bracket_nesting += 1,
+                            _ => (),
+                        }
+                    }
                 }
             }
         };
