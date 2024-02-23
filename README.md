@@ -34,10 +34,22 @@ Brainfuck samples can be found in the samples directory. Notably, `./brainfuck s
 
 ### Optimized compiler
 
-`/src/lib/{optimized_command.rs, optimized_program.rs}` provides us with structs to represent optimized brainfuck commands (series of `+`/`-` are packed in one `Add` and series of `>`/`<` are packed in one `Move`) which are combined in optimized brainfuck programs
+`/src/lib/{optimized_command.rs, optimized_program.rs}` provides us with structs to represent optimized brainfuck commands (see section below) which are combined in optimized brainfuck programs
 
 `/src/lib/optimized_compiler.rs` does the same as `compiler.rs` but on an optimized brainfuck program
 
 ## JIT compiler optimizations
 
-The JIT compiler packs series of `+`/`-` are into one `Add` and series of `>`/`<` into one `Move`.
+- pack series of `+`/`-` into one `Add`
+- pack series of `>`/`<` into one `Move`
+- write `[-]` in one optimized command `SetToZero`
+
+## Benchmark
+
+time needed for each method to run `mandelbrot.bf` on a scale normalized at one for the optimized compiler
+
+| method             | time  |
+| ------------------ | ----- |
+| optimized compiler | 1     |
+| compiler           | 3.12  |
+| interpreter        | 23.95 |

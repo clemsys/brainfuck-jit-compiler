@@ -15,18 +15,28 @@ impl From<&[Command]> for OptimizedProgram {
     fn from(program: &[Command]) -> Self {
         let mut optimized_program = Vec::new();
 
-        for command in program {
-            match (optimized_program.last_mut(), command) {
-                (Some(OptimizedCommand::Move(offset)), Command::MoveRight) => {
+        let mut iter = program.iter().peekable();
+        while let Some(command) = iter.next() {
+            match (optimized_program.last_mut(), command, iter.peek()) {
+                (
+                    Some(OptimizedCommand::JumpForward),
+                    Command::Decrement,
+                    Some(Command::JumpBackwards),
+                ) => {
+                    optimized_program.pop();
+                    optimized_program.push(OptimizedCommand::SetToZero);
+                    iter.next();
+                }
+                (Some(OptimizedCommand::Move(offset)), Command::MoveRight, _) => {
                     *offset += 1;
                 }
-                (Some(OptimizedCommand::Move(offset)), Command::MoveLeft) => {
+                (Some(OptimizedCommand::Move(offset)), Command::MoveLeft, _) => {
                     *offset -= 1;
                 }
-                (Some(OptimizedCommand::Add(value)), Command::Increment) => {
+                (Some(OptimizedCommand::Add(value)), Command::Increment, _) => {
                     *value = value.wrapping_add(1);
                 }
-                (Some(OptimizedCommand::Add(value)), Command::Decrement) => {
+                (Some(OptimizedCommand::Add(value)), Command::Decrement, _) => {
                     *value = value.wrapping_sub(1);
                 }
                 _ => {

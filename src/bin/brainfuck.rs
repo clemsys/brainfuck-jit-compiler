@@ -38,13 +38,11 @@ fn main() {
                 process::exit(2);
             }
         }
+    } else if args.no_optimize {
+        let mut compiler = Compiler::new(program, 30_000);
+        compiler.run();
     } else {
-        if args.no_optimize {
-            let mut compiler = Compiler::new(program, 30_000);
-            compiler.run();
-        } else {
-            let mut compiler = OptimizedCompiler::new(program.into(), 30_000);
-            compiler.run();
-        }
+        let mut compiler = OptimizedCompiler::new(program.into(), 30_000);
+        compiler.run();
     }
 }
